@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>红绿灯无限循环</title>
+    <style>
+        .green{
+            background: green;
+        }
+        .yellow{
+            background: yellow;
+        }
+        .red{
+            background: red;
+        }
+        #light{
+            width: 100px;
+            height: 100px;
+            border-radius: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div id="light"></div>
+    <script>
+        // 要求路口的红绿灯，绿灯亮10s 黄灯 2s 红灯 5s的顺序无限循环 js代码控制
+        // 思路：初始执行一次，后序定时器一直执行，计算相等时间再开启新一轮循环
+        function show(){
+            let green = document.getElementById('light');
+            if(green.classList.contains('red')){
+                green.classList.remove('red')
+            }
+            green.classList.add('green');
+            setTimeout(()=>{
+                green.classList.remove('green');
+                green.classList.add('yellow');
+            },10000);
+            setTimeout(()=>{
+                green.classList.remove('yellow');
+                green.classList.add('red');
+            },12000)
+        }
+        show();
+        var test2 = setInterval(function(){
+            show();
+        },17000)
+
+    </script>
+
+</body>
+</html>

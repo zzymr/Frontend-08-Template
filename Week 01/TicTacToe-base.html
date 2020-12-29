@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三子棋</title>
+    <style>
+     #board{
+         width: 306px;
+     }   
+     .cell{
+         width: 100px;
+         height: 100px;
+         border: 1px solid #ffffff;
+         background-color: green;
+         text-align: center;
+         font-size: 50px;
+         line-height: 100px;
+         display: inline-block;
+         vertical-align: middle;
+     }
+    </style>
+</head>
+<body>
+    <div id="board">
+
+    </div>
+    <script>
+        // 创建二维数据
+        let pattern = [
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0]
+        ];
+        let color = 1;
+        // 渲染棋盘
+        // 1、获取棋盘节点 2、循环创建 创建每个cell 设置class名 根据数值类型进行文字填充 
+        // 3、增加点击监听事件 ,每次点击前重绘
+        function show(){
+          let board = document.getElementById('board');
+          board.innerHTML = "";
+          for(let i=0; i<3; i++){
+              for(let j=0; j< 3; j++){
+                  let cell = document.createElement('div');
+                  cell.classList.add('cell');
+                  cell.innerText = pattern[i][j] === 2 ? '⭕️':
+                  pattern[i][j] === 1 ? '❌': '';
+                  cell.addEventListener('click',() => move(i,j))
+                  board.appendChild(cell);
+              }
+          }
+        }
+
+        // 点击触发函数，小技巧，交换律 color 1 2
+        function move(x, y){
+            pattern[x][y] = color;
+            // 判断输赢
+            if(check(pattern, color)){
+                alert(color === 2 ? '⭕️ is winner': '❌ is winner');
+            }
+            color = 3 - color;
+            console.log(bestChoice(pattern, color));
+            show();
+            // ai判断输赢
+            if(willWin(pattern, color)){
+                console.log(color === 2 ? '⭕️ is winner': '❌ is winner');
+            }
+
+        }
+        // 判断输赢函数 三横 ，三纵 ，正对角 ii， 反对角 2-i
+        function check(pattern, color){
+            // 三纵
+            {
+                for(let i=0; i<3; i++){
+                    let win = true;
+                    for(let j=0; j< 3; j++){
+                    if(pattern[i][j] !== color){
+                        win = false
+                    }
+                }
+                if(win){
+                    return true;
+                }
+              }
+            }
+            // 三横
+            {
+                for(let i=0; i<3; i++){
+                    let win = true;
+                    for(let j=0; j< 3; j++){
+                    if(pattern[j][i] !== color){
+                        win = false
+                    }
+                }
+                if(win){
+                    return true;
+                }
+              }
+            }                        
+            // 正对角
+            {
+                let win = true;
+                for(let i=0; i<3; i++){
+                    if(pattern[i][i] !== color){
+                        win = false;
+                    }
+                }
+                if(win){
+                    return true;
+                }
+            }             
+            // 反对角    
+            {
+                let win = true;                
+                for(let i=0; i<3; i++){
+                    if(pattern[i][2-i] !== color){
+                        win = false;
+                    }
+                }
+                if(win){
+                    return true;
+                }
+            }                     
+        }
+        // 克隆函数 深拷贝
+        function clone(pattern){
+          return JSON.parse(JSON.stringify(pattern));  
+        }
+        // ai判断输赢函数，循环每一个节点
+        function willWin(pattern, color){
+            for(let i=0; i<3; i++){
+                    let win = true;
+                    for(let j=0; j< 3; j++){
+                        // 如果不为空继续执行
+                        if(pattern[i][j])
+                            continue
+                        let tem =  clone(pattern);
+                        tem[i][j] = color;
+                        if(check(tem, color)){
+                          // return true;
+                          return [i, j];
+                        }
+                }
+            }    
+            // return false;    
+            return null;
+        }
+        // 最优策略 -2初始结果， 1赢，0平局
+        function bestChoice(pattern, color){
+            let p;
+            if(p = willWin(pattern,color)){ 
+                return {
+                    point: p,
+                    result: 1
+                }
+            }
+            let result = -2;
+            let point = null;
+            // 跳出双层循环label做标记
+            outer:for(let i=0; i<3; i++){
+                    let win = true;
+                    for(let j=0; j< 3; j++){
+                        // 如果不为空继续执行
+                        if(pattern[i][j])
+                            continue
+                        let tem =  clone(pattern);
+                        tem[i][j] = color;
+                        // 递归判断对手的结果
+                        let r = bestChoice(tem, 3 - color).result;
+                        // 判断我方的结果
+                        if(-r > result){
+                            result = -r; // 相反数重新赋值
+                            point = [i,j];
+                        }
+                        // 赢了直接跳出递归
+                        if(result == 1)
+                           break outer;
+                }
+            }  
+            return {
+              point: point,
+              result: point? result : 0
+            }        
+        }     
+        // 执行show函数
+        show(pattern);
+        console.log(bestChoice(pattern, color));           
+    </script>
+</body>
+</html>
