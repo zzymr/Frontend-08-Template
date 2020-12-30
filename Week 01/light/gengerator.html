@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>generator模拟实现红绿灯</title>
+    <style>
+        div{
+            width: 100px;
+            height: 100px;
+            border-radius: 50px;
+            background-color: grey;
+            margin-left: 30px;
+            display: inline-block;
+        }
+        .green.light{
+            background: green;
+        }
+        .yellow.light{
+            background: yellow;
+        }
+        .red.light{
+            background: red;
+        }  
+    </style>
+</head>
+<body>
+    <div class="green"></div>
+    <div class="yellow"></div>
+    <div class="red"></div>
+    <script>
+       function removeClass(){
+         let lights = document.getElementsByTagName('div');
+         for(let i= 0; i < lights.length; i++){
+            lights[i].classList.remove('light')
+         }  
+       }    
+       // tag作为标记切换不同的灯
+       function light(tag){
+          switch(tag){
+              case 'green':
+                removeClass();
+                document.getElementsByClassName('green')[0].classList.add('light');
+              break;
+              case 'yellow':
+                removeClass();
+                document.getElementsByClassName('yellow')[0].classList.add('light');              
+              break; 
+              case 'red':
+                removeClass();
+                document.getElementsByClassName('red')[0].classList.add('light');                 
+              break;
+              default: break;                           
+          }
+       }
+       function sleep(time){
+          return new Promise((resolve, reject)=>{
+            setTimeout(resolve, time);
+          })
+       }
+       //红绿灯切换  generator模拟实现async await 
+       function* show(){
+         while(true){
+            light('green');
+            yield sleep(10000)
+            light('yellow');
+            yield sleep(2000);
+            light('red');
+            yield sleep(5000);
+         }
+       }
+       // 不太理解这套流程？？
+       function run(iterator){
+         let { value, done } = iterator.next();
+         if(done)
+          return;
+         if(value instanceof Promise){
+             value.then(()=>{
+                 run(iterator);
+             })
+         }
+       }
+       function co(generator){
+          return function(){
+              return run(generator());
+          }
+       }
+       show = co(show);
+       show();
+    </script>
+
+</body>
+</html>

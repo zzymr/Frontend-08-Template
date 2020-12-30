@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>async实现红绿灯</title>
+    <style>
+        div{
+            width: 100px;
+            height: 100px;
+            border-radius: 50px;
+            background-color: grey;
+            margin-left: 30px;
+            display: inline-block;
+        }
+        .green.light{
+            background: green;
+        }
+        .yellow.light{
+            background: yellow;
+        }
+        .red.light{
+            background: red;
+        }  
+        button{
+          margin: 0 auto;
+          text-align: center;
+          line-height: 40px;
+          width: 100px;
+          margin-left: 50px;
+        }      
+    </style>
+</head>
+<body>
+    <div class="green"></div>
+    <div class="yellow"></div>
+    <div class="red"></div>
+    <button id="next">next</button>
+    <script>
+       function removeClass(){
+         let lights = document.getElementsByTagName('div');
+         for(let i= 0; i < lights.length; i++){
+            lights[i].classList.remove('light')
+         }  
+       }    
+       // tag作为标记切换不同的灯
+       function light(tag){
+          switch(tag){
+              case 'green':
+                removeClass();
+                document.getElementsByClassName('green')[0].classList.add('light');
+              break;
+              case 'yellow':
+                removeClass();
+                document.getElementsByClassName('yellow')[0].classList.add('light');              
+              break; 
+              case 'red':
+                removeClass();
+                document.getElementsByClassName('red')[0].classList.add('light');                 
+              break;
+              default: break;                           
+          }
+       }
+       function sleep(time){
+          return new Promise((resolve, reject)=>{
+            setTimeout(resolve, time);
+          })
+       }
+       // 手动控制
+       function happen(element, eventName){
+        return new Promise((resolve, reject)=>{
+            element.addEventListener(eventName, resolve);
+          }) 
+       }  
+       //红绿灯切换  async await  同步的方式编写异步执行代码，语法层做了改进
+      //  async function show(){
+      //    while(true){
+      //       light('green');
+      //       await sleep(10000);
+      //       light('yellow');
+      //       await sleep(2000);
+      //       light('red');
+      //       await sleep(5000);
+      //    }
+      //  }
+       async function show(){
+         while(true){
+            light('green');
+            await happen(document.getElementById('next'), 'click');
+            light('yellow');
+            await happen(document.getElementById('next'), 'click');
+            light('red');
+            await happen(document.getElementById('next'), 'click');
+         }
+       }  
+       show();
+    </script>
+
+</body>
+</html>

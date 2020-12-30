@@ -1,4 +1,3 @@
-
 学习笔记
 TicTacToe
 
@@ -30,7 +29,7 @@ Object.create();
 2、promise 链式调用  .then .all .pace(竞争)
 
 3、async/ await 更加友好的语义化代码实现，语法改进 和同步代码一样
-   向同步代码一样使用异步代码
+   向同步代码一样进行异步编程，最终节点肯定有return new Promise的返回
 4、gengerator模拟async函数
    gengerator函数会返回一个iterator迭代器
    模仿著名框架co

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>promise实现红绿灯</title>
+    <style>
+        div{
+            width: 100px;
+            height: 100px;
+            border-radius: 50px;
+            background-color: grey;
+            margin-left: 30px;
+            display: inline-block;
+        }
+        .green.light{
+            background: green;
+        }
+        .yellow.light{
+            background: yellow;
+        }
+        .red.light{
+            background: red;
+        }        
+    </style>
+</head>
+<body>
+    <div class="green"></div>
+    <div class="yellow"></div>
+    <div class="red"></div>
+    <script>
+       function removeClass(){
+         let lights = document.getElementsByTagName('div');
+         for(let i= 0; i < lights.length; i++){
+            lights[i].classList.remove('light')
+         }  
+       }    
+       // tag作为标记切换不同的灯
+       function light(tag){
+          switch(tag){
+              case 'green':
+                removeClass();
+                document.getElementsByClassName('green')[0].classList.add('light');
+              break;
+              case 'yellow':
+                removeClass();
+                document.getElementsByClassName('yellow')[0].classList.add('light');              
+              break; 
+              case 'red':
+                removeClass();
+                document.getElementsByClassName('red')[0].classList.add('light');                 
+              break;
+              default: break;                           
+          }
+       }
+       function sleep(time){
+          return new Promise((resolve, reject)=>{
+            setTimeout(resolve, time);
+          })
+       }
+       //红绿灯切换  链式调用
+       function show(){
+         light('green');
+         sleep(10000).then(()=>{
+            light('yellow');
+            return sleep(2000);
+         }).then(()=>{
+            light('red');
+            return sleep(5000);
+         }).then(show);
+       }
+       show();
+    </script>
+
+</body>
+</html>
