@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>四则运算分析</title></title>
+</head>
+<body>
+    <script>
+        // 定义正则对象 ()表示捕获
+        let regexp = /([0-9\.]+)|([ \t]+)|([\r\n]+)|(\+)|(\-)|(\*)|(\/)/g;
+        // 字典
+        let dictionary = ["Number", "WhiteSpace", "LineTerminator", "+", "-", "*", "/"];
+
+        function* tokennize(source) {
+            let lastIndex = 0;
+            let result = null;
+            while(true) {
+                lastIndex = regexp.lastIndex;  // 正则的lastIndex 属性用于规定下次匹配的起始位置
+                result = regexp.exec(source);
+                if(!result) 
+                  break;
+                if(regexp.lastIndex - lastIndex > result[0].length)
+                  // throw error   
+                  break;
+
+                let token = {
+                    type: null,
+                    value: null
+                }  
+                for(let i = 1; i <= dictionary.length; i++) {
+                  if(result[i])
+                     token.type = dictionary[i-1];
+                  console.log('dictionary[i-1]', dictionary[i-1]);
+                }
+                token.value = result[0];
+                yield token;
+                console.log('result:', result);
+            }
+            yield {
+                type: "EOF"
+            }
+            
+        }
+
+        let source = [];
+        // tokennize("1024 + 10 * 25"); 10 * 25 / 2     2 + 3 - 1  1 + 2 * 5 - 3 
+        for(let token of tokennize("1 + 2 * 5 - 3")) {
+            console.log('token:', token);
+            if(token.type !== "WhiteSpace" && token.type !== "LineTerminator") 
+              source.push(token);
+        }
+        
+        // 整体加EOF结构 -> 单根
+        function Expression(tokens) {
+            if(source[0].type === "AdditiveExpression" && source[1] && source[1].type === "EOF") {
+               let node = {
+                   type: "Expression",
+                   children: [source.shift(), source.shift()]                   
+               }
+               source.unshift(node);
+               return node;
+           }
+           AdditiveExpression(source);
+           return Expression(source);
+        }
+        function AdditiveExpression(source) {
+            // AdditiveExpression包含了MultiplicativeExpression的所有逻辑先要处理
+           if(source[0].type === "MultiplicativeExpression") {
+               let node = {
+                   type: "AdditiveExpression",
+                   children: [source[0]]
+               }
+               source[0] = node;
+               return AdditiveExpression(source); // 递归
+           }
+           if(source[0].type === "AdditiveExpression" && source[1] && source[1].type === "+") {
+               let node = {
+                   type: "AdditiveExpression",
+                   operator: "+",
+                   children: []                   
+               }
+               node.children.push(source.shift());
+               node.children.push(source.shift());
+               MultiplicativeExpression(source);  // 处理掉source里面的非终结符 
+               node.children.push(source.shift());
+               source.unshift(node);
+               return AdditiveExpression(source);
+           }
+           if(source[0].type === "AdditiveExpression" && source[1] && source[1].type === "-") {
+            let node = {
+                   type: "AdditiveExpression",
+                   operator: "-",
+                   children: []                   
+               }
+               node.children.push(source.shift());
+               node.children.push(source.shift());
+               MultiplicativeExpression(source);
+               node.children.push(source.shift());
+               source.unshift(node);
+               return AdditiveExpression(source);               
+           } 
+           if(source[0].type === "AdditiveExpression") 
+             return source[0];
+            // 第一个进来的是Number 或者 MultiplicativeExpression没有被完整执行会先执行下面的语句
+            MultiplicativeExpression(source); 
+           return AdditiveExpression(source);         
+        }
+        // * / 进行相关合并
+        function MultiplicativeExpression(source) { // 可以做成异步处理
+           if(source[0].type === "Number") {
+               let node = {
+                   type: "MultiplicativeExpression",
+                   children: [source[0]]
+               }
+               source[0] = node;
+               return MultiplicativeExpression(source); //递归
+           }
+           // MultiplicativeExpression * Number     
+           if(source[0].type === "MultiplicativeExpression" && source[1] && source[1].type === "*") {
+               let node = {
+                   type: "MultiplicativeExpression",
+                   operator: "*",
+                   children: []                   
+               }
+               node.children.push(source.shift());
+               node.children.push(source.shift());
+               node.children.push(source.shift());
+               source.unshift(node);
+               return MultiplicativeExpression(source);
+           }
+           if(source[0].type === "MultiplicativeExpression" && source[1] && source[1].type === "/") {
+            let node = {
+                   type: "MultiplicativeExpression",
+                   operator: "/",
+                   children: []                   
+               }
+               node.children.push(source.shift());
+               node.children.push(source.shift());
+               node.children.push(source.shift());
+               source.unshift(node);
+               return MultiplicativeExpression(source);               
+           }
+           // 等同与 else   
+           if(source[0].type === "MultiplicativeExpression") 
+             return source[0];
+        
+           return MultiplicativeExpression(source); // 应该永远不会执行
+        }
+        // console.log(MultilicativeExpression(source));
+        // console.log(AdditiveExpression(source));
+        console.log(Expression(source));
+    </script>
+</body>
+</html>
