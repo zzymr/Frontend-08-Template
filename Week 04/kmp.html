@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KMP</title>
+</head>
+<body>
+    <script>
+        function kmp(source, pattern) {
+            // 计算table
+            let table = new Array(pattern.length).fill(0);
+            // 从0开始整个串都是重复的 j表示已经重复的字符串
+            // abcdabce
+            {
+                let i = 1, j = 0;  
+                while(i<pattern.length){
+                    if(pattern[i] === pattern[j]) {
+                    ++j, ++i;
+                    table[i] = j;
+                    } else {
+                    if(j>0) 
+                    j = table[j];
+                    else
+                    ++i;  
+                    } 
+                }
+                console.log(table);                
+            }
+            // 匹配 s
+            {
+                // i source串的位置， j是pattern串的位置
+                let i = 0, j = 0;
+                while(i < source.length) {
+                  if(pattern[j] === source[i]) {
+                      ++i, ++j;
+                  } else {
+                    if(j>0) 
+                      j = table[j];
+                    else
+                      ++i;                        
+                  }
+                  if(j === pattern.length)
+                    return true;                     
+                }
+                return false;
+            }
+
+        }
+        // kmp("Hello", "ll");
+        
+        // console.log(kmp("Hello", "ll"));
+        // console.log(kmp("abcdabcdabcex", "abcdabce"));
+        console.log(kmp("abc", "abc"));
+        // kmp("", "abcdabce");
+        // abababc aabaaac
+    </script>
+</body>
+</html>
