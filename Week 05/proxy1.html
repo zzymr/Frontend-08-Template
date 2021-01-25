@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>reactive实现</title>
+</head>
+<body>
+    <script>
+        // let callbacks = [];
+        // object作为key
+        let callbacks = new Map(); 
+        let reactivities = new Map(); //缓存
+        let usedReactivties = [];
+        let object = {
+            a: { b: 3 },
+            b: 2
+        }
+        let proxy = reactive(object);
+        console.log('proxy:', proxy);
+        effect(()=> {
+          // console.log('proxy.a:', proxy.a);
+          // 支持proxy.a.b形式
+          console.log('proxy.a:', proxy.a.b);
+        })
+        
+        function effect(callback) {
+            // callbacks.push(callback);
+            usedReactivties = [];
+            callback();
+            for (let reactivity of usedReactivties) {
+              if(!callbacks.has(reactivity[0])) {
+                callbacks.set(reactivity[0], new Map());
+              }
+              if(!callbacks.get(reactivity[0]).has(reactivity[1])) {
+                callbacks.get(reactivity[0]).set(reactivity[1], []);
+              }        
+              // 上边两层处理边界情况
+              callbacks.get(reactivity[0]).get(reactivity[1]).push(callback);      
+            }
+        }
+        function reactive(object) {
+          if(reactivities.has(object)) {
+            return reactivities.get(object);
+          }
+          let proxy =  new Proxy(object, {
+           set(obj, prop, val) {
+             obj[prop] = val;
+            //  console.log(obj, prop, val);
+             if(callbacks.get(obj))
+               if(callbacks.get(obj).get(prop)) {
+                 for (let callback of callbacks.get(obj).get(prop)) {
+                  callback();
+                 }
+               }
+             return obj[prop];
+           },
+           get(obj, prop) {
+            // console.log(obj, prop);s
+            usedReactivties.push([obj, prop]);
+            if(typeof obj[prop] === 'object') {
+              return  reactive(obj[prop]); //生成新的effect ，需要全局表格存储
+            }
+            return obj[prop];
+           }
+        })
+         reactivities.set(object, proxy);
+         return proxy;
+        }
+
+        console.log('callbacks:', callbacks);
+    </script>
+</body>
+</html>
