@@ -1,4 +1,5 @@
 const http = require('http');
+
 http.createServer((request, response)=>{
   let body = [];
   request.on('error', (err) => {
@@ -6,10 +7,12 @@ http.createServer((request, response)=>{
   }).on('data', (chunk) => {
      body.push(chunk.toString());
   }).on('end', () => {
-     body = Buffer.concat(body).toString();
+   //   body = Buffer.concat(body).toString();  报错
+     body = body.join("");
      console.log('body:', body);
-     response.writeHead(200, {'Content-type' : 'text/html'});
+     response.writeHead(200, {'Content-Type' : 'text/html'});
      response.end(' Hello Word\n');
   })
-}).listen(8095)
+}).listen(8088)
+
 console.log('server started');
