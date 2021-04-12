@@ -1,6 +1,10 @@
 
 
 const css = require("css");
+
+const EOF = Symbol("EOF"); // EOF: End of File
+const layout = require("./layout.js");
+
 let currentToken = null;
 let currentAttribute = null;
 
@@ -73,12 +77,12 @@ function match(element, selector) {
       return false;
   }
   if(selector.charAt(0) === "#") {
-      let attr = element.attributes.filter(attr => attr.name === "id" );
+      let attr = element.attributes.filter(attr => attr.name === "id" )[0];
       if(attr && attr.value === selector.replace("#", '')) {
          return true;
       } 
   }else if(selector.charAt(0) === ".") {
-    let attr = element.attributes.filter(attr => attr.name === "class" );
+    let attr = element.attributes.filter(attr => attr.name === "class" )[0];
     if(attr && attr.value === selector.replace(".", '')) {
        return true;
     } 
@@ -154,6 +158,7 @@ function emit(token) {
             if(top.tagName === "style") {
                 addCSSRules(top.children[0].content);
             }
+            layout(top);
             stack.pop();
         }
         currentTextNode = null;
@@ -169,7 +174,8 @@ function emit(token) {
     }
     
 }
-const EOF = Symbol("EOF"); // EOF: End of File
+
+
 
 function data(c) {
   if(c === "<") {
