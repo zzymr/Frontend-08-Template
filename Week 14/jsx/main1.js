@@ -1,17 +1,18 @@
+// jsx基本使用方法
 function createElement(type, attributes, ...children) {
    let element;
-   if(typeof type === "string") {
+   if (typeof type === "string") {
       // element = document.createElement(type);
       element = new ElementWrapper(type);
    } else {
       element = new type;
    }
-      
+
    for (let name in attributes) {
       element.setAttribute(name, attributes[name]);
    }
    for (let child of children) {
-      if(typeof child === "string") {
+      if (typeof child === "string") {
          // child = document.createTextNode(child);
          child = new TextWrapper(child);
       }
@@ -22,47 +23,48 @@ function createElement(type, attributes, ...children) {
 // 普通的div转化为有mountTo的形式
 class ElementWrapper {
    constructor(type) {
-     this.root = document.createElement(type);
+      this.root = document.createElement(type);
    }
    setAttribute(name, value) {
-     this.root.setAttribute(name, value);
-   } 
+      this.root.setAttribute(name, value);
+   }
    appendChild(child) {
       // this.root.appendChild(child);
       child.mountTo(this.root);
    }
    mountTo(parent) {
-     parent.appendChild(this.root);
+      parent.appendChild(this.root);
    }
 }
 class TextWrapper {
    constructor(content) {
-     this.root = document.createTextNode(content);
+      this.root = document.createTextNode(content);
    }
    setAttribute(name, value) {
-     this.root.setAttribute(name, value);
-   } 
+      this.root.setAttribute(name, value);
+   }
    appendChild(child) {
       // this.root.appendChild(child);
       child.mountTo(this.root);
    }
    mountTo(parent) {
-     parent.appendChild(this.root);
+      parent.appendChild(this.root);
    }
 }
+// class Div {
 class Carousel {
    constructor() {
-     this.root = document.createElement("div");
+      this.root = document.createElement("div");
    }
    setAttribute(name, value) {
-     this.root.setAttribute(name, value);
-   } 
+      this.root.setAttribute(name, value);
+   }
    appendChild(child) {
       // this.root.appendChild(child);
       child.mountTo(this.root);
    }
    mountTo(parent) {
-     parent.appendChild(this.root);
+      parent.appendChild(this.root);
    }
 }
 let a = <div id="a">
